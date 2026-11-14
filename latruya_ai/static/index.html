@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Latruya AI</title>
+<script src="/static/marked.min.js"></script>
+<script src="/static/purify.min.js"></script>
+<style>
+  :root {
+    --bg: #faf9f7; --panel: #ffffff; --sidebar: #f2f0ec; --text: #1f1d1a; --muted: #6f6a62;
+    --border: #e3dfd8; --accent: #b4532a; --accent-text: #ffffff; --user: #efe9e1;
+    --code: #f4f1ec; --hover: #e9e5de; --danger: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1b19; --panel: #232220; --sidebar: #171614; --text: #ece9e4; --muted: #9c968c;
+      --border: #34322e; --accent: #e07a4b; --accent-text: #1c1b19; --user: #2e2c29;
+      --code: #2a2926; --hover: #2c2a27; --danger: #f2827a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; overflow: hidden;
+  }
+  button, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* sidebar */
+  #sidebar {
+    width: 270px; flex-shrink: 0; background: var(--sidebar); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 14px 10px;
+  }
+  .brand { font-weight: 650; font-size: 17px; padding: 4px 8px 14px; display: flex; align-items: center; gap: 8px; }
+  .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .side-btn {
+    width: 100%; text-align: left; border: 1px solid var(--border); background: var(--panel);
+    border-radius: 10px; padding: 9px 12px; margin-bottom: 8px;
+  }
+  .side-btn:hover { background: var(--hover); }
+  #chats { flex: 1; overflow-y: auto; margin-top: 6px; }
+  .chat-item {
+    display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    color: var(--text); font-size: 14px;
+  }
+  .chat-item:hover, .chat-item.active { background: var(--hover); }
+  .chat-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chat-item .del { opacity: 0; border: 0; background: none; color: var(--muted); padding: 0 4px; }
+  .chat-item:hover .del { opacity: 1; }
+  .side-foot { font-size: 12px; color: var(--muted); padding: 10px 8px 0; }
+
+  /* main */
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #topbar { display: none; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  #topbar button { border: 0; background: none; font-size: 20px; padding: 0 4px; }
+  #messages { flex: 1; overflow-y: auto; padding: 24px 16px 8px; }
+  .inner { max-width: 760px; margin: 0 auto; }
+  .empty { text-align: center; color: var(--muted); margin-top: 18vh; }
+  .empty h1 { color: var(--text); font-size: 28px; font-weight: 600; margin: 0 0 6px; }
+  .suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+  .suggestions button {
+    border: 1px solid var(--border); background: var(--panel); border-radius: 999px; padding: 7px 14px; font-size: 14px;
+  }
+  .suggestions button:hover { background: var(--hover); }
+
+  .msg { margin: 0 0 22px; }
+  .msg.user { display: flex; flex-direction: column; align-items: flex-end; }
+  .msg.user .bubble {
+    background: var(--user); border-radius: 16px; padding: 10px 14px; max-width: 85%;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .files { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; justify-content: flex-end; }
+  .chip { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--muted); }
+  .msg.ai .body { overflow-wrap: anywhere; }
+  .body p { margin: 0 0 12px; }
+  .body pre { background: var(--code); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+  .body code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+  .body pre code { background: none; padding: 0; }
+  .body table { border-collapse: collapse; display: block; overflow-x: auto; margin: 0 0 12px; }
+  .body th, .body td { border: 1px solid var(--border); padding: 6px 10px; }
+  .body a { color: var(--accent); }
+  .body img { max-width: 100%; }
+  details.thinking { margin-bottom: 10px; color: var(--muted); font-size: 13.5px; }
+  details.thinking summary { cursor: pointer; user-select: none; }
+  details.thinking div { white-space: pre-wrap; border-left: 2px solid var(--border); padding: 4px 0 4px 12px; margin-top: 6px; }
+  .status { font-size: 13px; color: var(--muted); margin: 4px 0; display: flex; align-items: center; gap: 8px; }
+  .status.live::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.25; } }
+  .sources { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .sources a {
+    font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--muted);
+    text-decoration: none; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .sources a:hover { color: var(--text); }
+  .notice { font-size: 13px; color: var(--accent); margin-top: 6px; }
+  .error { font-size: 13.5px; color: var(--danger); margin-top: 6px; }
+
+  /* composer */
+  #composer-wrap { padding: 8px 16px 16px; }
+  #composer {
+    max-width: 760px; margin: 0 auto; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 10px 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  #pending { display: flex; flex-wrap: wrap; gap: 6px; }
+  #pending .chip { cursor: pointer; }
+  #pending:not(:empty) { margin-bottom: 8px; }
+  #input {
+    width: 100%; border: 0; outline: none; resize: none; background: transparent; max-height: 220px; min-height: 26px;
+  }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .icon-btn { border: 1px solid var(--border); background: var(--panel); border-radius: 8px; padding: 4px 10px; }
+  .icon-btn:hover { background: var(--hover); }
+  select { border: 1px solid var(--border); background: var(--panel); border-radius: 8px; padding: 4px 6px; }
+  .spacer { flex: 1; }
+  #send { border: 0; background: var(--accent); color: var(--accent-text); border-radius: 10px; padding: 6px 16px; font-weight: 600; }
+  #send:disabled { opacity: 0.45; cursor: default; }
+  .hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* memory dialog */
+  dialog { border: 1px solid var(--border); border-radius: 14px; background: var(--panel); color: var(--text);
+    width: min(640px, calc(100vw - 32px)); max-height: 80vh; padding: 20px; }
+  dialog::backdrop { background: rgba(0,0,0,0.35); }
+  dialog h2 { margin: 0 0 10px; font-size: 18px; }
+  dialog pre { background: var(--code); padding: 10px; border-radius: 8px; white-space: pre-wrap; font-size: 13px; }
+  .dlg-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .danger { color: var(--danger); }
+
+  @media (max-width: 760px) {
+    #sidebar { position: fixed; inset: 0 auto 0 0; z-index: 10; transform: translateX(-100%); transition: transform 0.2s; }
+    #sidebar.open { transform: none; box-shadow: 0 0 40px rgba(0,0,0,0.3); }
+    #topbar { display: flex; }
+    #messages { padding-top: 16px; }
+    .msg.user .bubble { max-width: 92%; }
+  }
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand"><span class="brand-dot"></span>Latruya AI</div>
+  <button class="side-btn" id="new-chat">＋ New chat</button>
+  <button class="side-btn" id="show-memory">🧠 What I remember</button>
+  <div id="chats"></div>
+  <div class="side-foot" id="model-info"></div>
+</aside>
+
+<main id="main">
+  <div id="topbar"><button id="menu" aria-label="Menu">☰</button><strong>Latruya AI</strong></div>
+  <div id="messages"><div class="inner" id="thread"></div></div>
+  <div id="composer-wrap">
+    <form id="composer">
+      <div id="pending"></div>
+      <textarea id="input" rows="1" placeholder="Ask anything…" autofocus></textarea>
+      <div class="row">
+        <button type="button" class="icon-btn" id="attach" title="Attach images, PDFs or text files">📎 Attach</button>
+        <input type="file" id="file" multiple hidden accept="image/*,.pdf,.txt,.md,.csv,.json,.py,.js,.ts,.html,.css">
+        <select id="effort" title="How hard to think"></select>
+        <span class="spacer"></span>
+        <button id="send" type="submit" disabled>Send</button>
+      </div>
+    </form>
+    <div class="hint">Enter to send · Shift+Enter for a new line</div>
+  </div>
+</main>
+
+<dialog id="memory-dialog">
+  <h2>What I remember about you</h2>
+  <div id="memory-body"></div>
+  <div class="dlg-row">
+    <button class="icon-btn danger" id="forget">Forget everything</button>
+    <button class="icon-btn" id="close-memory">Close</button>
+  </div>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { conv: null, files: [], busy: false, config: null };
+const EFFORT_LABELS = { low: "Fast", medium: "Balanced", high: "Thorough", xhigh: "Deep", max: "Maximum" };
+const SUGGESTIONS = [
+  "What's happening in the news today?",
+  "Help me plan my week",
+  "Explain something I've always wondered about",
+  "Remember that I prefer short answers",
+];
+
+function md(text) {
+  if (window.marked && window.DOMPurify) return DOMPurify.sanitize(marked.parse(text));
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML.replace(/\n/g, "<br>");
+}
+
+async function api(path, options = {}) {
+  const res = await fetch(path, options);
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+  return res.json();
+}
+
+/* ---------- sidebar ---------- */
+async function loadChats() {
+  const chats = await api("/api/conversations");
+  const box = $("chats");
+  box.innerHTML = "";
+  for (const c of chats) {
+    const item = document.createElement("div");
+    item.className = "chat-item" + (state.conv === c.id ? " active" : "");
+    const title = document.createElement("span");
+    title.textContent = c.title;
+    const del = document.createElement("button");
+    del.className = "del"; del.textContent = "✕"; del.title = "Delete chat";
+    del.onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Delete “${c.title}”?`)) return;
+      await api(`/api/conversations/${c.id}`, { method: "DELETE" });
+      if (state.conv === c.id) newChat();
+      loadChats();
+    };
+    item.append(title, del);
+    item.onclick = () => openChat(c.id);
+    box.append(item);
+  }
+}
+
+function newChat() {
+  state.conv = null;
+  renderEmpty();
+  loadChats();
+  $("sidebar").classList.remove("open");
+  $("input").focus();
+}
+
+async function openChat(id) {
+  const conv = await api(`/api/conversations/${id}`);
+  state.conv = id;
+  const thread = $("thread");
+  thread.innerHTML = "";
+  for (const entry of conv.transcript) {
+    if (entry.role === "user") addUser(entry.text, entry.files);
+    else {
+      const view = addAssistant();
+      view.setThinking(entry.thinking || "");
+      view.setText(entry.text || "");
+      view.addSources(entry.sources || []);
+      (entry.notices || []).forEach(view.notice);
+    }
+  }
+  scrollDown(true);
+  loadChats();
+  $("sidebar").classList.remove("open");
+}
+
+/* ---------- thread rendering ---------- */
+function renderEmpty() {
+  const thread = $("thread");
+  thread.innerHTML = `<div class="empty"><h1>How can I help?</h1>
+    <div>Search the web, read your files and photos, and remember what matters to you.</div>
+    <div class="suggestions"></div></div>`;
+  const box = thread.querySelector(".suggestions");
+  for (const s of SUGGESTIONS) {
+    const b = document.createElement("button");
+    b.textContent = s;
+    b.onclick = () => { $("input").value = s; updateSend(); send(); };
+    box.append(b);
+  }
+}
+
+function addUser(text, files = []) {
+  const thread = $("thread");
+  thread.querySelector(".empty")?.remove();
+  const msg = document.createElement("div");
+  msg.className = "msg user";
+  if (files.length) {
+    const f = document.createElement("div");
+    f.className = "files";
+    files.forEach((n) => { const c = document.createElement("span"); c.className = "chip"; c.textContent = "📄 " + n; f.append(c); });
+    msg.append(f);
+  }
+  if (text) {
+    const b = document.createElement("div");
+    b.className = "bubble"; b.textContent = text;
+    msg.append(b);
+  }
+  thread.append(msg);
+}
+
+function addAssistant() {
+  const msg = document.createElement("div");
+  msg.className = "msg ai";
+  const thinking = document.createElement("details");
+  thinking.className = "thinking"; thinking.hidden = true;
+  thinking.innerHTML = "<summary>Reasoning</summary><div></div>";
+  const statuses = document.createElement("div");
+  const body = document.createElement("div");
+  body.className = "body";
+  const sources = document.createElement("div");
+  sources.className = "sources";
+  const extra = document.createElement("div");
+  msg.append(thinking, statuses, body, sources, extra);
+  $("thread").append(msg);
+
+  let text = "", thought = "", live = null, raf = 0;
+  const render = () => { raf = 0; body.innerHTML = md(text); scrollDown(); };
+  return {
+    setThinking(t) { thought = t; thinking.hidden = !t; thinking.querySelector("div").textContent = t; },
+    addThinking(t) { this.setThinking(thought + t); },
+    setText(t) { text = t; render(); },
+    addText(t) { text += t; this.clearLive(); if (!raf) raf = requestAnimationFrame(render); },
+    status(t, placeholder = false) {
+      this.clearLive();
+      live = document.createElement("div");
+      live.className = "status live"; live.textContent = t;
+      if (placeholder) live.dataset.placeholder = "1";
+      statuses.append(live); scrollDown();
+    },
+    clearLive() {
+      if (!live) return;
+      if (live.dataset.placeholder) live.remove(); else live.classList.remove("live");
+      live = null;
+    },
+    addSources(items) {
+      for (const s of items) {
+        const a = document.createElement("a");
+        a.href = s.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+        a.textContent = s.title || new URL(s.url).hostname; a.title = s.url;
+        sources.append(a);
+      }
+    },
+    notice(t) { const d = document.createElement("div"); d.className = "notice"; d.textContent = t; extra.append(d); },
+    error(t) { const d = document.createElement("div"); d.className = "error"; d.textContent = t; extra.append(d); },
+    finish() { this.clearLive(); if (raf) { cancelAnimationFrame(raf); render(); } },
+  };
+}
+
+function scrollDown(force = false) {
+  const box = $("messages");
+  if (force || box.scrollHeight - box.scrollTop - box.clientHeight < 160) box.scrollTop = box.scrollHeight;
+}
+
+/* ---------- sending ---------- */
+async function send() {
+  const input = $("input");
+  const text = input.value.trim();
+  if (state.busy || (!text && !state.files.length)) return;
+  state.busy = true; updateSend();
+
+  try {
+    if (!state.conv) { state.conv = (await api("/api/conversations", { method: "POST" })).id; }
+  } catch (e) { alert(e.message); state.busy = false; updateSend(); return; }
+
+  const form = new FormData();
+  form.append("text", text);
+  form.append("effort", $("effort").value);
+  state.files.forEach((f) => form.append("files", f));
+  addUser(text, state.files.map((f) => f.name));
+  input.value = ""; state.files = []; renderPending(); autoSize();
+  const view = addAssistant();
+  view.status("Thinking", true);
+  scrollDown(true);
+
+  try {
+    const res = await fetch(`/api/conversations/${state.conv}/messages`, { method: "POST", body: form });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        if (!chunk.startsWith("data: ")) continue;
+        const ev = JSON.parse(chunk.slice(6));
+        if (ev.type === "text") view.addText(ev.text);
+        else if (ev.type === "thinking") view.addThinking(ev.text);
+        else if (ev.type === "status") view.status(ev.text);
+        else if (ev.type === "sources") view.addSources(ev.items);
+        else if (ev.type === "notice") view.notice(ev.text);
+        else if (ev.type === "error") view.error(ev.text);
+      }
+    }
+  } catch (e) {
+    view.error("Connection problem: " + e.message);
+  }
+  view.finish();
+  state.busy = false; updateSend();
+  loadChats();
+}
+
+function updateSend() { $("send").disabled = state.busy || (!$("input").value.trim() && !state.files.length); }
+function autoSize() { const i = $("input"); i.style.height = "auto"; i.style.height = Math.min(i.scrollHeight, 220) + "px"; }
+function renderPending() {
+  const box = $("pending");
+  box.innerHTML = "";
+  state.files.forEach((f, i) => {
+    const c = document.createElement("span");
+    c.className = "chip"; c.textContent = `📄 ${f.name} ✕`; c.title = "Remove";
+    c.onclick = () => { state.files.splice(i, 1); renderPending(); updateSend(); };
+    box.append(c);
+  });
+}
+
+/* ---------- memory ---------- */
+async function showMemory() {
+  const files = await api("/api/memory");
+  const body = $("memory-body");
+  body.innerHTML = "";
+  if (!files.length) body.innerHTML = "<p>Nothing yet. Tell me about yourself and I'll remember what matters.</p>";
+  for (const f of files) {
+    const h = document.createElement("div"); h.style.fontWeight = "600"; h.textContent = f.path;
+    const p = document.createElement("pre"); p.textContent = f.content;
+    body.append(h, p);
+  }
+  $("memory-dialog").showModal();
+}
+
+/* ---------- wiring ---------- */
+$("composer").onsubmit = (e) => { e.preventDefault(); send(); };
+$("input").addEventListener("input", () => { autoSize(); updateSend(); });
+$("input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+});
+$("attach").onclick = () => $("file").click();
+$("file").onchange = (e) => { state.files.push(...e.target.files); e.target.value = ""; renderPending(); updateSend(); };
+$("new-chat").onclick = newChat;
+$("show-memory").onclick = showMemory;
+$("close-memory").onclick = () => $("memory-dialog").close();
+$("forget").onclick = async () => {
+  if (!confirm("Erase everything I remember about you?")) return;
+  await api("/api/memory", { method: "DELETE" });
+  showMemory();
+};
+$("menu").onclick = () => $("sidebar").classList.toggle("open");
+$("main").addEventListener("click", (e) => { if (!e.target.closest("#topbar")) $("sidebar").classList.remove("open"); });
+document.addEventListener("dragover", (e) => e.preventDefault());
+document.addEventListener("drop", (e) => {
+  e.preventDefault();
+  state.files.push(...e.dataTransfer.files); renderPending(); updateSend();
+});
+
+(async () => {
+  state.config = await api("/api/config");
+  const sel = $("effort");
+  for (const lvl of state.config.effort_levels) {
+    const o = document.createElement("option");
+    o.value = lvl; o.textContent = EFFORT_LABELS[lvl] || lvl;
+    if (lvl === state.config.effort) o.selected = true;
+    sel.append(o);
+  }
+  $("model-info").textContent = `${state.config.model} · v${state.config.version}`;
+  if (!state.config.memory) $("show-memory").hidden = true;
+  renderEmpty();
+  loadChats();
+})();
+</script>
+</body>
+</html>
