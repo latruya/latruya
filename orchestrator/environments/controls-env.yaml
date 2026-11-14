@@ -1,0 +1,46 @@
+name: controls-orchestrator-env
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: true
+    allow_mcp_servers: false
+    allowed_hosts:
+      - siemens.com
+      - "*.siemens.com"
+      - rockwellautomation.com
+      - "*.rockwellautomation.com"
+      - beckhoff.com
+      - "*.beckhoff.com"
+      - se.com
+      - "*.se.com"
+      - mitsubishielectric.com
+      - "*.mitsubishielectric.com"
+      - omron.com
+      - "*.omron.com"
+      - abb.com
+      - "*.abb.com"
+      - br-automation.com
+      - "*.br-automation.com"
+      - phoenixcontact.com
+      - "*.phoenixcontact.com"
+      - wago.com
+      - "*.wago.com"
+      - codesys.com
+      - "*.codesys.com"
+      - automationdirect.com
+      - "*.automationdirect.com"
+      - emerson.com
+      - "*.emerson.com"
+      - inductiveautomation.com
+      - "*.inductiveautomation.com"
+      - opcfoundation.org
+      - "*.opcfoundation.org"
+      - plcopen.org
+      - "*.plcopen.org"
+      - odva.org
+      - "*.odva.org"
+      - profibus.com
+      - "*.profibus.com"
+      - isa.org
+      - "*.isa.org"
