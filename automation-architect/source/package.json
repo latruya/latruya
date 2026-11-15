@@ -1,0 +1,10 @@
+{
+  "name": "automation-architect-report",
+  "private": true,
+  "scripts": { "build": "node build.cjs" },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5",
+    "@fontsource/ibm-plex-sans": "^5",
+    "@fontsource/source-serif-4": "^5"
+  }
+}

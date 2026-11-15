@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Automating Controls Engineering with Claude and Vendor AI</title>
+<meta name="author" content="Prepared with Claude Code">
+<meta name="subject" content="Recommended architecture for automating industrial controls engineering">
+<style>
+@font-face { font-family: "Plex"; font-weight: 400; src: url("node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Plex"; font-weight: 400; font-style: italic; src: url("node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Plex"; font-weight: 500; src: url("node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Plex"; font-weight: 600; src: url("node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Plex"; font-weight: 700; src: url("node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Serif4"; font-weight: 400; src: url("node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Serif4"; font-weight: 400; font-style: italic; src: url("node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Serif4"; font-weight: 600; src: url("node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "PlexMono"; font-weight: 400; src: url("node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "PlexMono"; font-weight: 500; src: url("node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+
+:root {
+  --ink: #16212c;
+  --ink-2: #36434f;
+  --muted: #667380;
+  --rule: #d3d9df;
+  --tint: #f2f4f6;
+  --ai: #1e3d57;
+  --ai-mid: #44627a;
+  --ai-tint: #e6edf2;
+  --gate: #b4490f;
+  --gate-tint: #fbeee4;
+}
+
+@page {
+  size: A4;
+  margin: 19mm 17mm 20mm 17mm;
+  @bottom-left {
+    content: "Automating controls engineering with Claude and vendor AI";
+    font-family: "Plex", sans-serif; font-size: 7pt; color: #667380;
+  }
+  @bottom-right {
+    content: counter(page);
+    font-family: "PlexMono", monospace; font-size: 7.5pt; color: #36434f;
+  }
+}
+@page :first {
+  margin: 0;
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0; color: var(--ink);
+  font-family: "Serif4", Georgia, serif; font-size: 9.6pt; line-height: 1.46;
+  font-variant-numeric: lining-nums;
+}
+p { margin: 0 0 6.5pt; text-wrap: pretty; }
+a { color: inherit; text-decoration: none; }
+strong { font-weight: 600; }
+
+/* ---------- cover ---------- */
+.cover {
+  height: 297mm; padding: 26mm 22mm 20mm; display: flex; flex-direction: column;
+  break-after: page; position: relative;
+}
+.cover .kicker {
+  font-family: "PlexMono", monospace; font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.cover h1 {
+  font-family: "Plex", sans-serif; font-weight: 600; font-size: 35pt; line-height: 1.08; letter-spacing: -.018em;
+  margin: 30mm 0 0; max-width: 150mm; text-wrap: balance;
+}
+.cover .bar { width: 26mm; height: 1.4mm; background: var(--gate); margin: 9mm 0 8mm; }
+.cover .sub {
+  font-family: "Serif4", serif; font-size: 14pt; line-height: 1.4; color: var(--ink-2); max-width: 135mm; text-wrap: pretty;
+}
+.cover .glance {
+  margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 0.6pt solid var(--ink);
+}
+.cover .glance div { padding: 5mm 6mm 0 0; }
+.cover .glance div + div { padding-left: 6mm; border-left: 0.5pt solid var(--rule); }
+.cover .glance h3 {
+  font-family: "PlexMono", monospace; font-weight: 500; font-size: 7.4pt; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gate); margin: 0 0 2.5mm;
+}
+.cover .glance p { font-family: "Plex", sans-serif; font-size: 9.2pt; line-height: 1.42; color: var(--ink-2); margin: 0; }
+.cover .meta {
+  margin-top: 12mm; display: flex; justify-content: space-between;
+  font-family: "PlexMono", monospace; font-size: 7.6pt; color: var(--muted); letter-spacing: .04em;
+}
+
+/* ---------- headings ---------- */
+h2 {
+  font-family: "Plex", sans-serif; font-weight: 600; font-size: 17pt; line-height: 1.18; letter-spacing: -.01em;
+  margin: 0 0 3.5mm; break-after: avoid; text-wrap: balance;
+}
+h2 .n {
+  display: block; font-family: "PlexMono", monospace; font-weight: 500; font-size: 7.6pt; letter-spacing: .14em;
+  color: var(--gate); margin-bottom: 1.6mm;
+}
+section { margin-bottom: 8mm; }
+section.newpage { break-before: page; }
+h3 {
+  font-family: "Plex", sans-serif; font-weight: 600; font-size: 10.4pt; margin: 5mm 0 1.8mm; break-after: avoid;
+}
+.lead { font-size: 11.2pt; line-height: 1.45; color: var(--ink); margin-bottom: 4mm; }
+.note { font-family: "Plex", sans-serif; font-size: 7.6pt; line-height: 1.4; color: var(--muted); margin-top: 2mm; }
+
+/* ---------- lists ---------- */
+ol.points { list-style: none; margin: 0 0 4mm; padding: 0; counter-reset: pt; }
+ol.points li {
+  counter-increment: pt; position: relative; padding: 0 0 0 9mm; margin-bottom: 3.2mm; break-inside: avoid;
+}
+ol.points li::before {
+  content: counter(pt); position: absolute; left: 0; top: .2mm; width: 5.6mm; height: 5.6mm; border-radius: 50%;
+  background: var(--ai); color: #fff; font-family: "Plex", sans-serif; font-weight: 600; font-size: 8pt;
+  display: flex; align-items: center; justify-content: center;
+}
+ol.points li b { font-family: "Plex", sans-serif; font-weight: 600; }
+ul.tight { margin: 0 0 4pt; padding-left: 4.2mm; }
+ul.tight li { margin-bottom: 2.2pt; padding-left: .5mm; }
+ul.tight li::marker { color: var(--gate); }
+
+/* ---------- callouts ---------- */
+.callout {
+  border-left: 1.1mm solid var(--gate); background: var(--gate-tint); padding: 3.4mm 4.5mm 3mm; margin: 4mm 0; break-inside: avoid;
+  font-family: "Plex", sans-serif; font-size: 8.7pt; line-height: 1.45;
+}
+.callout.ai { border-left-color: var(--ai); background: var(--ai-tint); }
+.callout h4 {
+  font-family: "PlexMono", monospace; font-weight: 500; font-size: 7.2pt; letter-spacing: .12em; text-transform: uppercase;
+  margin: 0 0 1.6mm; color: var(--gate);
+}
+.callout.ai h4 { color: var(--ai); }
+.callout p { margin: 0 0 4pt; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* ---------- tables ---------- */
+table { width: 100%; border-collapse: collapse; margin: 2.5mm 0 3mm; font-family: "Plex", sans-serif; font-size: 7.75pt; line-height: 1.36; }
+thead th {
+  text-align: left; font-weight: 600; font-size: 6.7pt; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2);
+  padding: 0 2.2mm 1.5mm 0; border-bottom: 0.9pt solid var(--ink); vertical-align: bottom;
+}
+tbody td { padding: 1.65mm 2.4mm 1.65mm 0; border-bottom: 0.45pt solid var(--rule); vertical-align: top; }
+tbody tr { break-inside: avoid; }
+tbody td:first-child { font-weight: 600; color: var(--ink); }
+tbody td:last-child, thead th:last-child { padding-right: 0; }
+td .sub { display: block; font-weight: 400; color: var(--muted); font-size: 7.1pt; margin-top: .6mm; }
+tr.group td {
+  font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.8pt; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ai); background: var(--ai-tint); padding: 1.3mm 2mm; border-bottom: none;
+}
+.tag {
+  display: inline-block; font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.5pt; letter-spacing: .04em;
+  padding: .25mm 1.5mm; border-radius: 1mm; background: var(--tint); color: var(--ink-2); white-space: nowrap;
+}
+.tag.a { background: #dfeee6; color: #1d5a3c; }
+.tag.b { background: var(--ai-tint); color: var(--ai); }
+.tag.c { background: var(--gate-tint); color: var(--gate); }
+.lvl { font-family: "PlexMono", monospace; font-size: 6.8pt; white-space: nowrap; }
+.lvl i { display: inline-block; width: 2.1mm; height: 2.1mm; border-radius: 50%; background: var(--rule); margin-right: .5mm; }
+.lvl i.on { background: var(--ai); }
+
+/* ---------- architecture diagram ---------- */
+.arch { margin: 3mm 0 2mm; font-family: "Plex", sans-serif; break-inside: avoid; }
+.arch .row { display: grid; gap: 2mm; margin-bottom: 2mm; }
+.arch .lbl {
+  font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.5pt; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 1.1mm;
+}
+.arch .box { border-radius: 1.2mm; padding: 2.6mm 3.2mm; font-size: 8pt; line-height: 1.35; }
+.arch .humans { grid-template-columns: 1.25fr 1fr; }
+.arch .human { background: var(--gate-tint); border: 0.6pt solid #e5b998; }
+.arch .human .lbl { color: var(--gate); }
+.arch .architect { background: var(--ai); color: #fff; padding: 3.4mm 4mm 3.6mm; }
+.arch .architect .lbl { color: #b9cddc; }
+.arch .architect .title { font-weight: 600; font-size: 12pt; letter-spacing: -.005em; }
+.arch .architect .title span { font-weight: 400; color: #c6d6e2; font-size: 9pt; }
+.arch .kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2mm; margin-top: 2.6mm; }
+.arch .kit div { background: rgba(255,255,255,.1); border: 0.5pt solid rgba(255,255,255,.28); border-radius: 1mm; padding: 1.7mm 2.4mm; font-size: 7.6pt; line-height: 1.32; }
+.arch .kit b { display: block; font-weight: 600; font-size: 8pt; }
+.arch .subs { background: var(--ai-tint); border: 0.6pt solid #b9cad7; }
+.arch .subs .lbl { color: var(--ai); }
+.arch .chips { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1.4mm; }
+.arch .chips span { background: #fff; border: 0.5pt solid #b9cad7; border-radius: 1mm; padding: 1.3mm 1mm; text-align: center; font-size: 7.3pt; font-weight: 500; color: var(--ai); }
+.arch .band {
+  text-align: center; font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.9pt; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--ink-2); padding: 1.4mm; border-top: 0.6pt dashed var(--muted); border-bottom: 0.6pt dashed var(--muted); margin-bottom: 2mm;
+}
+.arch .tools { grid-template-columns: repeat(4, 1fr); }
+.arch .tool { background: var(--tint); border: 0.6pt solid var(--rule); }
+.arch .tool .lbl { color: var(--ink-2); }
+.arch .tool ul { margin: 0; padding: 0; list-style: none; font-size: 7.5pt; line-height: 1.42; }
+.arch .out { background: #fff; border: 0.9pt solid var(--ink); text-align: center; font-weight: 500; font-size: 8.4pt; }
+.arch .out .lbl { color: var(--ink); }
+.arch .flow { text-align: center; font-size: 8pt; color: var(--muted); line-height: 1; margin: -0.6mm 0 1.2mm; }
+figcaption, .cap { font-family: "Plex", sans-serif; font-size: 7.5pt; color: var(--muted); margin-top: 1.5mm; }
+figure { margin: 0; }
+
+/* ---------- pipeline diagram ---------- */
+.pipe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4.6mm; margin: 4mm 0 1mm; padding-right: 2.8mm; font-family: "Plex", sans-serif; break-inside: avoid; }
+.pipe .st { position: relative; background: var(--ai-tint); border: 0.6pt solid #b9cad7; border-radius: 1.2mm; padding: 2.4mm 2.3mm 2.6mm; min-height: 25mm; }
+.pipe .st .num { font-family: "PlexMono", monospace; font-weight: 500; font-size: 7pt; color: var(--ai-mid); letter-spacing: .08em; }
+.pipe .st b { display: block; font-weight: 600; font-size: 9.4pt; color: var(--ai); margin: .4mm 0 1mm; }
+.pipe .st span { font-size: 7.2pt; line-height: 1.34; color: var(--ink-2); display: block; }
+.pipe .st .g {
+  position: absolute; right: -4.05mm; top: 50%; width: 3.5mm; height: 3.5mm; background: var(--gate);
+  transform: translateY(-50%) rotate(45deg); z-index: 2;
+}
+.pipe .st .ar { position: absolute; right: -3.9mm; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 9pt; line-height: 1; }
+.pipe-loop {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4.6mm; font-family: "Plex", sans-serif; font-size: 7.2pt; color: var(--ai-mid); margin-bottom: 1.5mm; padding-right: 2.8mm;
+}
+.pipe-loop div { grid-column: 4 / span 2; border: 0.6pt solid var(--ai-mid); border-top: none; border-radius: 0 0 1.5mm 1.5mm; height: 4.2mm; position: relative; margin: 0 9mm; }
+.pipe-loop div span { position: absolute; left: 50%; bottom: -1.6mm; transform: translateX(-50%); background: #fff; padding: 0 1.5mm; white-space: nowrap; }
+.legend { font-family: "Plex", sans-serif; font-size: 7.5pt; color: var(--muted); display: flex; gap: 6mm; align-items: center; margin-top: 2.5mm; }
+.legend i.d { display: inline-block; width: 2.6mm; height: 2.6mm; background: var(--gate); transform: rotate(45deg); margin-right: 1.8mm; vertical-align: -0.2mm; }
+
+/* ---------- sim loop ---------- */
+.loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5mm; margin: 3.5mm 0 1mm; font-family: "Plex", sans-serif; break-inside: avoid; }
+.loop div { position: relative; border: 0.6pt solid var(--rule); background: var(--tint); border-radius: 1.2mm; padding: 2.2mm 2.4mm; font-size: 7.5pt; line-height: 1.34; color: var(--ink-2); }
+.loop div b { display: block; font-size: 8.3pt; font-weight: 600; color: var(--ink); margin-bottom: .7mm; }
+.loop div:not(:last-child)::after { content: "\2192"; position: absolute; right: -4.3mm; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 9pt; }
+.loop div.end { background: #fff; border: 0.9pt solid var(--ink); }
+.loop-back { font-family: "Plex", sans-serif; font-size: 7.2pt; color: var(--ai-mid); border: 0.6pt solid var(--ai-mid); border-top: none; border-radius: 0 0 1.5mm 1.5mm; height: 4.2mm; margin: 0 22% 3.5mm 9%; position: relative; }
+.loop-back span { position: absolute; left: 50%; bottom: -1.6mm; transform: translateX(-50%); background: #fff; padding: 0 1.5mm; white-space: nowrap; }
+
+/* ---------- two-col ---------- */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; }
+.cols h3:first-child { margin-top: 0; }
+.io { font-family: "Plex", sans-serif; font-size: 8.3pt; line-height: 1.42; }
+.io h4 { font-family: "PlexMono", monospace; font-weight: 500; font-size: 7.2pt; letter-spacing: .12em; text-transform: uppercase; color: var(--ai); margin: 0 0 1.6mm; padding-bottom: 1.2mm; border-bottom: 0.6pt solid var(--ink); }
+.io ul { margin: 0; padding-left: 4mm; }
+.io li { margin-bottom: 1.6pt; }
+
+/* ---------- roadmap ---------- */
+.road { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 3.5mm 0 3mm; font-family: "Plex", sans-serif; break-inside: avoid; border-top: 0.9pt solid var(--ink); }
+.road div { padding: 2.6mm 3mm 0 0; }
+.road div + div { padding-left: 3mm; border-left: 0.5pt solid var(--rule); }
+.road .when { font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.9pt; letter-spacing: .1em; text-transform: uppercase; color: var(--gate); }
+.road b { display: block; font-weight: 600; font-size: 9pt; margin: .8mm 0 1.2mm; }
+.road p { font-size: 7.5pt; line-height: 1.38; color: var(--ink-2); margin: 0; }
+
+/* ---------- sources ---------- */
+.sources { columns: 2; column-gap: 7mm; font-family: "Plex", sans-serif; font-size: 6.9pt; line-height: 1.36; color: var(--ink-2); }
+.sources h4 { font-family: "PlexMono", monospace; font-weight: 500; font-size: 6.6pt; letter-spacing: .12em; text-transform: uppercase; color: var(--ai); margin: 0 0 1mm; break-after: avoid; }
+.sources ul { list-style: none; margin: 0 0 3mm; padding: 0; }
+.sources li { margin-bottom: 1.3mm; break-inside: avoid; }
+.sources a { color: var(--ai-mid); word-break: break-all; }
+.gloss { columns: 2; column-gap: 7mm; font-family: "Plex", sans-serif; font-size: 7.6pt; line-height: 1.4; margin: 0; }
+.gloss div { break-inside: avoid; margin-bottom: 1.5mm; }
+.gloss b { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<div class="cover">
+  <div class="kicker">Recommendations report</div>
+  <h1>Automating controls engineering with Claude and vendor AI</h1>
+  <div class="bar"></div>
+  <div class="sub">A recommended architecture for taking a project from specification to tested, simulated and documented control software, across the major automation platforms and under each industry's rules.</div>
+
+  <div class="glance">
+    <div>
+      <h3>The architect</h3>
+      <p>Claude Code, packaged with the Claude Agent SDK, plans the project, directs the work and checks the result.</p>
+    </div>
+    <div>
+      <h3>The specialists</h3>
+      <p>Each vendor's own AI and engineering tools build inside their platform: Siemens Eigen, Rockwell FactoryTalk Conductor, Beckhoff CoAgent and others.</p>
+    </div>
+    <div>
+      <h3>The proof</h3>
+      <p>Every requirement is tested against a simulated plant. The results become the evidence in the documentation set.</p>
+    </div>
+  </div>
+  <div class="meta"><span>15 November 2026</span><span>Vendor information as published to this date</span></div>
+</div>
+
+<!-- ============================ 1 SUMMARY ============================ -->
+<section>
+  <h2><span class="n">01</span>The recommendation in brief</h2>
+  <p class="lead">Make Claude Code the architect. Run it on Claude's most capable model, package it with the Claude Agent SDK so the same pipeline runs on every project, and connect it to each vendor's own AI and engineering tools. You supply the specifications. The architect drafts the design, directs the vendor tools to build the software, proves it against a simulated plant, and assembles the documentation your industry requires. People approve the work at defined gates.</p>
+
+  <ol class="points">
+    <li><b>Claude Code with the Agent SDK is the architect.</b> Vendor engineering tools such as TIA Portal, Studio 5000 and DeltaV are licensed Windows applications on your own network. The orchestrator has to run beside them, with access to project files, scripts and version control. Claude Code and the Agent SDK are the Claude products built to run on your machines with that access.</li>
+    <li><b>Vendor AI does the platform-specific work.</b> Siemens, Rockwell, Schneider Electric, Beckhoff and CODESYS all shipped or announced AI for engineering in 2026: agents in some cases, open agent interfaces in others. These tools know their own platforms better than a general model does. Claude specifies the work, hands it to them, and checks what comes back.</li>
+    <li><b>Simulation is how the architect tests itself.</b> A separate test agent writes a test for every requirement. Tests run on emulated controllers against a plant model, failures go back to the build step automatically, and passing runs are stored as evidence.</li>
+    <li><b>Industry rules are packaged as Skills.</b> One pack per industry defines the lifecycle, the deliverables and the templates: GMP for life sciences, functional safety for process plants, machinery safety for discrete manufacturing. Changing industry means loading a different pack.</li>
+    <li><b>People stay accountable.</b> Approval of requirements, design, safety functions and release stays with named people. In GMP work this is a regulatory requirement.</li>
+  </ol>
+
+  <div class="callout">
+    <h4>What is realistic today</h4>
+    <p>"Specifications in, finished product out" is achievable as a gated pipeline. It is not achievable as an unattended one. Two things set the limit. Regulated industries require human review and signature, and the vendor agents are new and partly closed. Siemens, for example, documents no way for an outside agent to call Eigen, so that hand-off currently goes through an engineer or through TIA Portal's scripting interface.</p>
+    <p>The drafting, generating, testing and documenting can be largely automated now. The deciding and approving cannot, and should not be.</p>
+  </div>
+
+  <div class="cols" style="margin-top:6mm">
+    <div class="io">
+      <h4>What you provide</h4>
+      <ul>
+        <li>User requirements or a process description</li>
+        <li>P&amp;IDs and an I/O list or instrument index</li>
+        <li>Control narratives or sequence descriptions</li>
+        <li>Site standards, naming rules and module libraries</li>
+        <li>A platform preference, or leave the choice to stage 2</li>
+        <li>The industry, which selects the pack</li>
+      </ul>
+    </div>
+    <div class="io">
+      <h4>What comes out</h4>
+      <ul>
+        <li>The control project in the vendor's own format</li>
+        <li>A simulation model and an automated test suite</li>
+        <li>An evidence pack tied to requirement numbers</li>
+        <li>The documentation set for the chosen industry</li>
+        <li>A full Git history of every change and approval</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 2 ARCHITECTURE ============================ -->
+<section class="newpage">
+  <h2><span class="n">02</span>The architecture</h2>
+  <p>The system has four layers. People sit at the top and supply specifications and approvals. The architect and its specialist agents sit in the middle. Vendor AI, engineering tools and simulators sit at the bottom, reached through one connection standard.</p>
+
+  <figure>
+  <div class="arch">
+    <div class="row humans">
+      <div class="box human"><div class="lbl">You provide</div>User requirements, P&amp;IDs, I/O list, control narratives, site standards and libraries</div>
+      <div class="box human"><div class="lbl">People approve</div>Requirements, design, safety functions, test results, release</div>
+    </div>
+    <div class="flow">&#9660;&nbsp;&nbsp;&#9650;</div>
+    <div class="box architect">
+      <div class="lbl">The architect</div>
+      <div class="title">Claude Code + Claude Agent SDK <span>&nbsp;running Claude Fable 5.2</span></div>
+      <div class="kit">
+        <div><b>Skills</b>Industry packs, vendor packs, your company standards</div>
+        <div><b>Hooks</b>Approval gates, audit log, blocks on writes to live plant</div>
+        <div><b>Git</b>One versioned source of truth for every artifact</div>
+      </div>
+    </div>
+    <div class="flow">&#9660;</div>
+    <div class="box subs" style="margin-bottom:2mm">
+      <div class="lbl">Specialist subagents, each with its own context</div>
+      <div class="chips"><span>Requirements</span><span>Solution</span><span>Design</span><span>Build</span><span>Test author</span><span>Simulation</span><span>Documents</span><span>Reviewer</span></div>
+    </div>
+    <div class="band">Model Context Protocol (MCP) and vendor automation interfaces</div>
+    <div class="row tools">
+      <div class="box tool"><div class="lbl">Vendor AI</div><ul><li>Siemens Eigen</li><li>FactoryTalk Conductor</li><li>EcoStruxure copilot</li><li>TwinCAT CoAgent</li><li>CODESYS MCP Server</li></ul></div>
+      <div class="box tool"><div class="lbl">Engineering tools</div><ul><li>TIA Portal</li><li>Studio 5000</li><li>DeltaV, Experion</li><li>Automation Expert</li><li>TwinCAT 3</li></ul></div>
+      <div class="box tool"><div class="lbl">Simulation</div><ul><li>PLCSIM Advanced, SIMIT</li><li>Logix Echo, Emulate3D</li><li>DeltaV Simulate, Mimic</li><li>MATLAB, Simulink</li></ul></div>
+      <div class="box tool"><div class="lbl">Lifecycle systems</div><ul><li>Git, Copia Automation</li><li>Validation system (Kneat, ValGenesis)</li><li>Quality system</li></ul></div>
+    </div>
+    <div class="flow">&#9660;</div>
+    <div class="box out"><div class="lbl">Delivered</div>Tested control software &nbsp;&middot;&nbsp; simulation model and evidence &nbsp;&middot;&nbsp; industry documentation set</div>
+  </div>
+  <figcaption>Figure 1. Orange marks what people own. Dark blue marks the architect. Grey marks the tools it directs.</figcaption>
+  </figure>
+
+  <h3>How the layers divide the work</h3>
+  <p><strong>The architect</strong> holds the whole project in view. It reads the specifications, decides the order of work, delegates to specialists, and refuses to move past a gate until the required person has approved. It never edits a live controller.</p>
+  <p><strong>Subagents</strong> are separate Claude instances with their own instructions and their own context. The separation matters most for testing: the agent that writes tests works from the approved requirements and never sees the code, so it cannot repeat the builder's mistakes.</p>
+  <p><strong>MCP</strong>, the Model Context Protocol, is the open standard for giving an AI agent tools. Beckhoff and CODESYS already publish MCP interfaces. For vendors that do not, a small MCP server wrapped around the vendor's documented scripting interface does the same job.</p>
+  <p><strong>Git</strong> holds every artifact: requirements, design documents, exported project files, tests and results. Anything the architect produces can be compared, reviewed and rolled back.</p>
+</section>
+
+<!-- ============================ 3 CLAUDE PRODUCTS ============================ -->
+<section class="newpage">
+  <h2><span class="n">03</span>Which Claude product does what</h2>
+  <p>You asked for the best product or the best combination. The answer is a combination with a clear centre: six core pieces and four supporting ones.</p>
+
+  <table>
+    <thead><tr><th style="width:21%">Product</th><th style="width:23%">Role here</th><th>What it contributes</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="3">Core</td></tr>
+      <tr><td>Claude Code</td><td>The architect's working environment</td><td>Runs on the engineering workstation or virtual machine. Reads and writes project files, runs vendor scripts and command-line tools, uses Git, calls MCP servers. Interactive for engineers, unattended for pipelines.</td></tr>
+      <tr><td>Claude Agent SDK</td><td>Packages the architect as a repeatable service</td><td>The same engine as Claude Code, delivered as a Python or TypeScript library that you host. Stage gates, permissions and audit logging are enforced in code.</td></tr>
+      <tr><td>Agent Skills and plugins</td><td>Industry, vendor and company knowledge</td><td>Skills are versioned folders of instructions, templates and scripts that load when relevant: one pack per industry, one per platform, one for your own standards. A plugin bundles them with the subagents, hooks and MCP settings, so every engineer installs the same architect.</td></tr>
+      <tr><td>MCP connectors</td><td>The connection to every tool</td><td>Links Claude to vendor agents, engineering interfaces, simulators and document systems. Use vendor-published servers where they exist and build thin ones where they do not.</td></tr>
+      <tr><td>Subagents</td><td>Specialist roles</td><td>Separate context per role. Gives an independent test author and an independent reviewer.</td></tr>
+      <tr><td>Hooks</td><td>Guardrails that cannot be argued with</td><td>Scripts that run before and after every tool call. Block writes to production networks, stop at approval gates, record every action.</td></tr>
+      <tr class="group"><td colspan="3">Supporting</td></tr>
+      <tr><td>Claude API</td><td>Bulk document processing</td><td>Extracts I/O lists, datasheets and P&amp;ID tags into a fixed data structure. Citations tie each extracted requirement to its source page, which starts the traceability matrix.</td></tr>
+      <tr><td>Claude Managed Agents <span class="sub">beta</span></td><td>Hosted long-running work</td><td>Anthropic hosts the agent and its workspace. It can iterate against a grading rubric until the output passes, split work across agents, and run on a schedule. Suited to specification analysis and document generation. It cannot run vendor Windows tools directly.</td></tr>
+      <tr><td>Claude Cowork with Claude for Manufacturing and Claude for Life Sciences</td><td>Front office for people who are not developers</td><td>Requirement workshops, proposals, supplier and quality documents. Claude for Manufacturing (launched 12 November 2026) has 17 skills and connects to Autodesk Fusion, Infor, Microsoft 365 and Oracle NetSuite. It does not operate equipment, and its listed connectors do not include PLC tools.</td></tr>
+      <tr><td>Computer use</td><td>Last resort</td><td>Operates a tool's screen directly when no scripting interface exists. Slow and fragile. Avoid it for regulated deliverables.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Which model for which role</h3>
+  <table>
+    <thead><tr><th style="width:30%">Role</th><th style="width:19%">Model</th><th>Why</th><th style="width:17%">List price, input / output</th></tr></thead>
+    <tbody>
+      <tr><td>Architect, design reasoning, independent review</td><td>Claude Fable 5.2</td><td>The most capable model. Holds long multi-step work together.</td><td>$8 / $40</td></tr>
+      <tr><td>Build, test and simulation subagents</td><td>Claude Opus 5.5</td><td>Strong engineering work at half the price.</td><td>$4 / $20</td></tr>
+      <tr><td>High-volume drafting and reading</td><td>Claude Sonnet 5.5</td><td>Fast and economical for long documents.</td><td>$2 / $10</td></tr>
+      <tr><td>Bulk extraction and classification</td><td>Claude Haiku 5.5</td><td>Lowest cost for thousands of tags or datasheets.</td><td>$0.10 / $0.50</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Prices are Anthropic list prices in US dollars per million tokens, early November 2026. Fable 5.2 is not offered under zero-data-retention terms unless Anthropic authorizes it. Where a client contract requires zero retention, plan on Opus 5.5 for the architect role.</p>
+</section>
+
+<!-- ============================ 4 VENDOR LANDSCAPE ============================ -->
+<section class="newpage">
+  <h2><span class="n">04</span>Specialized AI from the automation vendors</h2>
+  <p>This is the position in November 2026. The last column says how Claude can reach each product, using the three patterns explained in section 5: <span class="tag a">A</span> direct MCP connection, <span class="tag b">B</span> a wrapper around the vendor's scripting interface, <span class="tag c">C</span> hand-off through an engineer.</p>
+
+  <table>
+    <thead><tr><th style="width:12%">Vendor</th><th style="width:41%">Specialized AI and what it does</th><th style="width:16%">Status</th><th>How Claude connects</th></tr></thead>
+    <tbody>
+      <tr><td>Siemens</td><td><strong>Eigen Engineering Agent.</strong> Plans, carries out and checks engineering tasks inside TIA Portal, with knowledge of the open project. Turns a machine description into a project that follows the Siemens Automation Framework. Also troubleshooting and text translation.</td><td>Shipping since April 2026. Cloud service for TIA Portal V19 to V21.</td><td><span class="tag c">C</span> <span class="tag b">B</span> No outside interface is documented. Hand off through an engineer, or drive TIA Portal through Openness.</td></tr>
+      <tr><td>Rockwell Automation</td><td><strong>FactoryTalk Conductor.</strong> Coordinates agents, skills and workflows across design, development and testing. Supports Studio 5000 Logix Designer, Logix Echo, Emulate3D and FactoryTalk Optix at launch. <strong>Design Studio Copilot</strong> writes ladder logic from plain language.</td><td>Conductor announced 21 October 2026. Copilot shipping.</td><td><span class="tag c">C</span> <span class="tag b">B</span> Conductor accepts customer-built agents and customer-supplied models. Whether an outside agent can call it is not confirmed. The scripted route is the Logix Designer SDK.</td></tr>
+      <tr><td>Schneider Electric</td><td><strong>Industrial copilot in EcoStruxure Automation Expert</strong>, built with Microsoft. Agent-based design and validation was shown in April 2026.</td><td>Copilot shipping. Agent features early stage.</td><td><span class="tag c">C</span> No outside interface confirmed.</td></tr>
+      <tr><td>Beckhoff</td><td><strong>TwinCAT 3 CoAgent for Engineering.</strong> Assists with PLC code, I/O configuration, HMI and documentation. Works with the customer's choice of model. The engineer approves every result.</td><td>Shipping since June 2026.</td><td><span class="tag a">A</span> Built on MCP. Beckhoff supplies MCP servers for PLC, I/O, HMI and documentation, and you can add your own.</td></tr>
+      <tr><td>CODESYS</td><td><strong>CODESYS MCP Server.</strong> Lets an AI agent read and edit projects, generate IEC 61131-3 blocks, read compiler messages and correct errors.</td><td>Shipping with the Professional Developer Edition.</td><td><span class="tag a">A</span> CODESYS names Claude among the supported assistants. Covers the many controllers built on CODESYS.</td></tr>
+      <tr><td>ABB and B&amp;R</td><td><strong>B&amp;R Automation Studio Copilot</strong> for Structured Text and C. ABB's Genix Copilot serves operations and asset performance, not control engineering.</td><td>Introduced in 2024.</td><td><span class="tag c">C</span> No engineering agent found for ABB's own control platforms.</td></tr>
+      <tr><td>Emerson</td><td><strong>DeltaV Revamp</strong> converts legacy configurations to DeltaV with AI assistance. <strong>DeltaV Agent.Connect</strong> answers questions from DeltaV documentation.</td><td>Shipping.</td><td><span class="tag b">B</span> Bulk edit and FHX import and export.</td></tr>
+      <tr><td>Honeywell</td><td><strong>Experion Operations Assistant</strong> serves operators. Engineering AI that converts P&amp;IDs and control narratives into graphics and control strategies is in development.</td><td>Operations shipping. Engineering in development.</td><td><span class="tag b">B</span> File-based bulk configuration until the engineering tools ship.</td></tr>
+    </tbody>
+  </table>
+  <p class="note"><strong style="color:var(--ink-2)">Also relevant.</strong> MathWorks publishes an open-source MATLAB MCP Server and lists Claude Code among supported agents; section 7 uses it for plant models. Inductive Automation's Catalyst Agent module will expose Ignition as MCP tools (documented for Ignition 2027). AVEVA's Industrial AI Assistant, in preview, serves plant design, and MCP access to AVEVA CONNECT is on its roadmap. Copia Automation provides Git-based version control for PLC projects across vendors.</p>
+
+  <h3>Three things the table shows</h3>
+  <ul class="tight">
+    <li><strong>Siemens and Rockwell now offer agents, not chat assistants.</strong> Eigen and Conductor carry out multi-step tasks. Siemens says Eigen completes tasks two to five times faster than manual work, and Schneider says its copilot cuts configuration and documentation work by up to half. These are the vendors' own figures. Measure them in your pilot.</li>
+    <li><strong>Beckhoff and CODESYS are the most open.</strong> Both are built on MCP and are not tied to one model, so Claude can work in the project directly.</li>
+    <li><strong>The process control vendors have aimed AI at operations and migration.</strong> This research found no shipping vendor agent that generates new DeltaV or Experion configurations. Claude generates the bulk-engineering files itself, which those platforms have long supported.</li>
+  </ul>
+</section>
+
+<!-- ============================ 5 INTEGRATION ============================ -->
+<section class="newpage">
+  <h2><span class="n">05</span>Connecting the architect to each platform</h2>
+  <p>There are three ways to connect Claude to a vendor's tools. Use the most direct one each vendor allows.</p>
+
+  <table>
+    <thead><tr><th style="width:21%">Pattern</th><th style="width:40%">How it works</th><th>Where it applies today</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag a">A</span>&nbsp; Direct MCP</td><td>The vendor publishes an MCP server, or its agent is built on MCP. Claude calls the vendor's tools itself and sees the results.</td><td>Beckhoff TwinCAT CoAgent, CODESYS MCP Server, MathWorks, Ignition when Catalyst is released.</td></tr>
+      <tr><td><span class="tag b">B</span>&nbsp; Interface wrapper</td><td>You build a small MCP server around the vendor's documented scripting interface. Every action is scripted, repeatable and logged. This is the workhorse for bulk generation and for simulation.</td><td>Siemens TIA Portal Openness and the PLCSIM Advanced interface. Rockwell Logix Designer SDK and Logix Echo SDK. Beckhoff Automation Interface. DeltaV bulk edit and FHX files.</td></tr>
+      <tr><td><span class="tag c">C</span>&nbsp; Hand-off through an engineer</td><td>The vendor agent is closed. Claude prepares the work package in the form the agent accepts. An engineer runs it in the vendor tool. Claude then reads the exported project back to review and test it.</td><td>Siemens Eigen. Schneider's copilot. Rockwell Conductor until an outside interface is confirmed.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Community MCP servers for TIA Portal already exist, for example T-IA Connect and TiaCommander. They are not Siemens products. Evaluate them before relying on them, or build your own wrapper around Openness.</p>
+
+  <h3>Recommended stack per platform</h3>
+  <table>
+    <thead><tr><th style="width:17%">Platform</th><th style="width:38%">Who builds</th><th style="width:33%">Emulation, plant model, unit tests</th><th>Pattern</th></tr></thead>
+    <tbody>
+      <tr><td>Siemens TIA Portal</td><td>Eigen carries out in-tool tasks from Claude's work packages. Openness scripts handle bulk generation. SIMATIC AX suits code kept as text.</td><td>S7-PLCSIM Advanced with SIMIT or NX Mechatronics Concept Designer. TIA Portal Test Suite.</td><td><span class="tag c">C</span> <span class="tag b">B</span></td></tr>
+      <tr><td>Rockwell Logix</td><td>FactoryTalk Conductor agents and Design Studio Copilot. Logix Designer SDK and L5X files handle bulk generation.</td><td>FactoryTalk Logix Echo with Emulate3D.</td><td><span class="tag c">C</span> <span class="tag b">B</span></td></tr>
+      <tr><td>Beckhoff TwinCAT 3</td><td>Claude works directly through CoAgent's MCP servers, or serves as the model behind CoAgent.</td><td>TwinCAT runtime on the engineering PC. Simulink models. TcUnit for unit tests.</td><td><span class="tag a">A</span></td></tr>
+      <tr><td>CODESYS-based controllers</td><td>Claude works directly through the CODESYS MCP Server.</td><td>CODESYS Control Win soft controller. CODESYS Test Manager.</td><td><span class="tag a">A</span></td></tr>
+      <tr><td>Schneider EcoStruxure Automation Expert</td><td>The EcoStruxure copilot builds from Claude's work packages.</td><td>Automation Expert's software controller. EcoStruxure Machine Expert Twin for machines.</td><td><span class="tag c">C</span></td></tr>
+      <tr><td>Emerson DeltaV</td><td>Claude generates class-based configuration through bulk edit and FHX. Revamp handles migrations.</td><td>DeltaV Simulate with Mimic.</td><td><span class="tag b">B</span></td></tr>
+      <tr><td>Honeywell Experion</td><td>Claude generates bulk-build files. Adopt Honeywell's engineering AI when it ships.</td><td>Experion simulation controllers with UniSim Design.</td><td><span class="tag b">B</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout ai">
+    <h4>Worked example: a Siemens project with Eigen</h4>
+    <p><strong>1.</strong> Claude writes the machine description and module specifications from the approved design. <strong>2.</strong> An engineer gives them to Eigen in TIA Portal, and Eigen builds the project. <strong>3.</strong> Claude exports the project through Openness and reviews it against the design. <strong>4.</strong> Claude loads it into PLCSIM Advanced and runs the tests. <strong>5.</strong> Each defect returns as a specific change request for Eigen, or as a scripted edit through Openness.</p>
+  </div>
+</section>
+
+<!-- ============================ 6 PIPELINE ============================ -->
+<section class="newpage">
+  <h2><span class="n">06</span>From specification to product: the pipeline</h2>
+  <p>The architect runs six stages. Five end at a gate where a named person approves before work continues. Build and Verify repeat automatically until the tests pass.</p>
+
+  <figure>
+  <div class="pipe">
+    <div class="st"><div class="num">01</div><b>Specify</b><span>Turn source documents into numbered, testable requirements</span><i class="g"></i></div>
+    <div class="st"><div class="num">02</div><b>Solve</b><span>Compare platforms and architectures, recommend one</span><i class="g"></i></div>
+    <div class="st"><div class="num">03</div><b>Design</b><span>Functional and design specifications, modules, alarms, risks</span><i class="g"></i></div>
+    <div class="st"><div class="num">04</div><b>Build</b><span>Generate software through vendor AI and scripts</span><span class="ar">&rarr;</span></div>
+    <div class="st"><div class="num">05</div><b>Verify</b><span>Test every requirement in simulation</span><i class="g"></i></div>
+    <div class="st"><div class="num">06</div><b>Document</b><span>Assemble the industry documentation set for release</span><i class="g" style="right:-1.75mm"></i></div>
+  </div>
+  <div class="pipe-loop"><div><span>fail: diagnose and rebuild</span></div></div>
+  <div class="legend"><span><i class="d"></i>Human approval gate</span></div>
+  </figure>
+
+  <table style="margin-top:4mm">
+    <thead><tr><th style="width:10%">Stage</th><th style="width:35%">What the architect does</th><th style="width:21%">Output</th><th style="width:17%">Who approves</th><th>Automation today</th></tr></thead>
+    <tbody>
+      <tr><td>1 Specify</td><td>Reads the requirements, P&amp;IDs, I/O lists and control narratives. Extracts numbered requirements with a citation to the source page. Lists gaps, conflicts and ambiguities and asks about them.</td><td>Requirements baseline. Open questions list.</td><td>Process owner</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i class="on"></i> High</span></td></tr>
+      <tr><td>2 Solve</td><td>Scores candidate platforms and architectures against weighted criteria: installed base, industry fit, lifecycle cost, simulation support, validation effort. Proposes network, redundancy and security zones.</td><td>Options analysis. Recommended architecture. Draft bill of materials.</td><td>Lead engineer</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i></i> Medium</span></td></tr>
+      <tr><td>3 Design</td><td>Writes the functional and design specifications. Builds the ISA-88 equipment and procedure models. Defines modules, interlocks, alarms and HMI. Starts the risk assessment and the traceability matrix.</td><td>Specifications. Module, alarm and I/O lists. Risk assessment.</td><td>Design review board</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i class="on"></i> High</span></td></tr>
+      <tr><td>4 Build</td><td>Uses proven library modules first and generates only what the library lacks. Builds through vendor AI or scripts. Runs style and static checks. An independent reviewer agent inspects the result.</td><td>Project in vendor format, versioned in Git.</td><td>None. Sampled code review.</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i></i> Medium to high</span></td></tr>
+      <tr><td>5 Verify</td><td>An independent agent derives tests from the requirements. Tests run on emulated controllers against a plant model, including injected faults. Failures return to Build.</td><td>Test specifications. Executed results. Evidence pack.</td><td>Test lead or quality</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i class="on"></i> High</span></td></tr>
+      <tr><td>6 Document</td><td>Assembles the document set from the actual project data. Completes the traceability matrix. Prepares protocols and the summary report.</td><td>Turnover or validation package.</td><td>Quality, with signatures</td><td><span class="lvl"><i class="on"></i><i class="on"></i><i class="on"></i> High</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">"Automation today" is this report's assessment of how much of the stage's effort the architect can carry, not a measured figure. Stage 2 is medium because the choice rests on commercial and strategic judgment. Stage 4 depends on how open the platform is.</p>
+
+  <div class="callout ai">
+    <h4>Keep the design independent of the vendor</h4>
+    <p>Have the architect hold the design in a neutral form before any vendor tool is touched: equipment and control modules, interlocks, sequences, alarms and I/O as structured data. Vendor-specific generation is then the last step. This lets one design serve several platforms, protects you while the vendor agents mature, and gives the test author something to work from that is not the code.</p>
+  </div>
+
+</section>
+
+<!-- ============================ 7 SIMULATION ============================ -->
+<section class="newpage">
+  <h2><span class="n">07</span>Simulation: how the architect tests its own work</h2>
+  <p>Self-simulation is what makes the rest trustworthy. The architect does not judge its own code by reading it. It loads the code into an emulated controller, runs the plant model against it, and compares the behaviour with what the requirements say should happen.</p>
+
+  <div class="loop">
+    <div><b>Build</b>Generate or change the code</div>
+    <div><b>Load</b>Download to an emulated controller</div>
+    <div><b>Run</b>Play scenarios against the plant model</div>
+    <div><b>Compare</b>Check behaviour against each requirement</div>
+    <div class="end"><b>Evidence</b>Store results by requirement number</div>
+  </div>
+  <div class="loop-back"><span>any failure: diagnose, fix, run again</span></div>
+
+  <h3>Two tiers of simulation</h3>
+  <table>
+    <thead><tr><th style="width:17%">Tier</th><th style="width:30%">What it is</th><th style="width:28%">Tools</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>1 Inner loop <span class="sub">minutes per run</span></td><td>Emulated controller plus a simple plant model that Claude writes in Python or Simulink, linked over OPC UA.</td><td>PLCSIM Advanced, Logix Echo, TwinCAT runtime, CODESYS Control Win. MATLAB through its MCP server.</td><td>Runs hundreds of scenarios on every change. Catches logic, sequence and interlock errors early.</td></tr>
+      <tr><td>2 Virtual acceptance test <span class="sub">hours per run</span></td><td>The same emulated controller against the vendor's high-fidelity digital twin of the process or machine.</td><td>SIMIT, NX Mechatronics Concept Designer, Emulate3D, Mimic, UniSim Design, AVEVA Dynamic Simulation.</td><td>Proves timing, dynamics and operator screens before factory acceptance. Also trains operators.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cols">
+    <div>
+      <h3>Rules that keep the testing honest</h3>
+      <ul class="tight">
+        <li><strong>Independent tests.</strong> The test author works from approved requirements and never sees the code.</li>
+        <li><strong>People review the test cases</strong>, not only the results. A wrong test that passes proves nothing.</li>
+        <li><strong>Inject faults.</strong> Break the code on purpose and confirm the tests fail. Tests that cannot fail are removed.</li>
+        <li><strong>Record the conditions.</strong> Each run stores the software version, test version, simulator settings, time and result per requirement.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>What simulation does not replace</h3>
+      <ul class="tight">
+        <li>Checks of field wiring and I/O at site</li>
+        <li>Instrument calibration and real device behaviour</li>
+        <li>Network timing and hardware faults on the real system</li>
+        <li>Mechanical and process reality that the model simplifies</li>
+      </ul>
+      <p style="margin-top:2mm">Site acceptance testing stays. Simulation moves most defects from site to the desk, where they are cheap to fix.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 8 INDUSTRY ============================ -->
+<section class="newpage">
+  <h2><span class="n">08</span>Industry packs: documentation and rules by sector</h2>
+  <p>Each industry pack is a Skill. It tells the architect which lifecycle to follow, which documents to produce, which templates to use, and which approvals to wait for. The engineering pipeline stays the same.</p>
+
+  <h3>Life sciences under GMP</h3>
+  <table>
+    <thead><tr><th style="width:22%">Element</th><th>What the pack contains</th></tr></thead>
+    <tbody>
+      <tr><td>Framework</td><td>GAMP 5 Second Edition lifecycle and software categories. ISPE GAMP Guide on Artificial Intelligence (2025). FDA 21 CFR Part 11, 210 and 211. EU GMP Annex 11 and Annex 15. Data integrity under ALCOA+. ICH Q9 risk management. ISA-88 for batch. FDA guidance on Computer Software Assurance (final September 2025; written for medical device production and quality systems, and widely used as a reference).</td></tr>
+      <tr><td>Documents generated</td><td>Validation plan. User requirements. Functional specification. Hardware and software design specifications. Risk assessment. Requirements traceability matrix. Code review records. Module and integration test specifications with executed simulation evidence. Factory and site acceptance protocols. Installation and operational qualification protocols. Part 11, Annex 11 and data integrity assessments. Validation summary report.</td></tr>
+      <tr><td>How the AI is positioned</td><td>As an engineering tool. A qualified person reviews and approves every output. Correctness is established by testing and review, not by trust in the generator. The pipeline itself is treated as a GAMP software tool: intended use documented, model and skill versions fixed per project, verified against a reference project, changed only under change control.</td></tr>
+      <tr><td>Signatures and records</td><td>People sign in your validated document or validation system, such as Kneat, ValGenesis or Veeva. The architect prepares documents and never signs them.</td></tr>
+      <tr><td>Lower the validation burden</td><td>Build from pre-validated library modules wherever possible. Configured standard modules (GAMP category 4) need less testing than custom code (category 5), and the architect should report the split.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <h4>Regulation to watch: draft EU GMP Annex 22</h4>
+    <p>The European Commission consulted on a new Annex 22 on artificial intelligence between July and October 2025, together with a revised Annex 11. As of November 2026 neither has been adopted. The draft says generative AI and large language models should not be used in critical GMP applications, and permits them in non-critical uses where a qualified person reviews the output. The European Medicines Agency held a workshop on generative AI in mid-2026, so the final text may differ.</p>
+    <p>The draft addresses AI built into manufacturing systems. An engineering assistant whose every output is reviewed by people and verified by conventional testing is a different use. That reading is this report's interpretation, not a regulatory ruling. Have your quality unit confirm it and check again when the final text appears.</p>
+  </div>
+
+  <h3>Other industries</h3>
+  <table>
+    <thead><tr><th style="width:19%">Industry</th><th style="width:36%">Governing standards</th><th>What the pack adds</th></tr></thead>
+    <tbody>
+      <tr><td>Chemicals, oil and gas</td><td>IEC 61511 and IEC 61508 for safety systems. ISA-18.2 for alarms. ISA-101 for operator screens. ISA-106 for procedures.</td><td>Cause and effect matrices. Alarm rationalization records. Safety requirements traceability. Safety logic kept separate and verified by people.</td></tr>
+      <tr><td>Machinery and discrete manufacturing</td><td>ISO 12100, ISO 13849-1, IEC 62061, IEC 60204-1, NFPA 79. PackML. EU Machinery Regulation 2023/1230, which applies from January 2027.</td><td>Safety function list with inputs for performance level verification. PackML state models. Contributions to the technical file.</td></tr>
+      <tr><td>Food and beverage</td><td>FDA 21 CFR Part 117. HACCP. PackML.</td><td>Critical control point monitoring and records. Clean-in-place sequences. Batch genealogy.</td></tr>
+      <tr><td>Water and power utilities</td><td>IEC 62443 and NIST SP 800-82. IEC 61850 and NERC CIP for power.</td><td>Telemetry and SCADA standards. Cybersecurity plan. Utility-specific reporting.</td></tr>
+      <tr><td>All industries</td><td>IEC 61131-3 and PLCopen coding guidelines. IEC 62443 for control system security.</td><td>Coding rules enforced by static checks. Security zones and access rules in the design.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ 9 GUARDRAILS ============================ -->
+<section class="newpage">
+  <h2><span class="n">09</span>Guardrails: what the architect must not do alone</h2>
+  <p>Each risk below has a control that the system enforces. None is left to the model's judgment.</p>
+
+  <table>
+    <thead><tr><th style="width:27%">Risk</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td>Logic that looks right and is wrong</td><td>Library modules first. Independent tests written from requirements. Simulation evidence for every requirement. Human design review at the gate.</td></tr>
+      <tr><td>Safety functions</td><td>The architect drafts and checks only. Safety instrumented systems and safety PLC logic are designed and verified by competent people, with the independence that IEC 61511 and ISO 13849 require, and kept separate from basic control.</td></tr>
+      <tr><td>Changes to a live plant</td><td>No network path from the architect to production controllers. Hooks block production address ranges. Authorized people download to real controllers under change control.</td></tr>
+      <tr><td>Confidential designs leaving the company</td><td>Use Claude under commercial terms, where Anthropic does not train on your data by default. Run the architect on your own machines. Check each vendor's cloud AI terms as well, since Eigen is a cloud service.</td></tr>
+      <tr><td>Work that cannot be traced or repeated</td><td>Git as the single source of truth. A log per deliverable of instructions given, tools called, and model and skill versions used. Versions are fixed per project and changed only after re-running a reference project.</td></tr>
+      <tr><td>The same AI writing code and tests</td><td>Separate agents with separate context. Human review of test cases. Fault injection to prove the tests can fail.</td></tr>
+      <tr><td>Vendor agents that are new and unproven</td><td>Keep the design in neutral form. Treat vendor productivity figures as unverified until your pilot measures them. Confirm licence terms for scripted use of engineering tools.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ 10 ROADMAP ============================ -->
+<section>
+  <h2><span class="n">10</span>How to start</h2>
+  <p>Start with one platform and one finished project to use as a reference. Build in order of lowest risk: documents, then code, then closed-loop simulation. The timings are indicative.</p>
+
+  <div class="road">
+    <div><div class="when">Weeks 1 to 4</div><b>Foundations</b><p>Choose the pilot platform and a reference project. Put standards, templates and libraries in Git. Install Claude Code beside the vendor tools. Write the first skills.</p></div>
+    <div><div class="when">Months 2 to 3</div><b>Specifications and documents</b><p>Automate stages 1, 3 and 6. Compare the output with the reference project's real documents.</p></div>
+    <div><div class="when">Months 3 to 6</div><b>Build and unit test</b><p>Connect the vendor AI and scripting interfaces. Build the module library. Run unit tests on an emulated controller.</p></div>
+    <div><div class="when">Months 6 to 9</div><b>Closed-loop simulation</b><p>Add plant models and the virtual acceptance test. Package the pipeline with the Agent SDK. Add hooks and the audit log.</p></div>
+    <div><div class="when">Months 9 to 12</div><b>Live pilot</b><p>Run a real project alongside conventional delivery. Have quality review the approach. Then add a second platform or industry.</p></div>
+  </div>
+
+  <div class="cols">
+    <div class="io">
+      <h4>Which platform to pilot</h4>
+      <p style="margin:0">Choose the platform where you have the most projects and the best module library. Given your interest in Eigen and in life sciences, a Siemens TIA Portal skid or process unit is the natural first pilot. Eigen is shipping and was piloted with over 100 customers, and PLCSIM Advanced with SIMIT gives a scriptable simulation chain. If a direct connection to Claude matters more than installed base, start with Beckhoff or CODESYS.</p>
+    </div>
+    <div class="io">
+      <h4>Questions to settle with vendors</h4>
+      <ul>
+        <li><strong>Siemens:</strong> does Eigen offer any outside interface, which tasks does it cover, and what are its licensing and data terms?</li>
+        <li><strong>Rockwell:</strong> can Conductor use Claude as its model, and can an outside agent start its workflows?</li>
+        <li><strong>Emerson and Honeywell:</strong> what is planned for configuration generation?</li>
+        <li><strong>All:</strong> do licence terms allow scripted and unattended use of the engineering tools?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SOURCES ============================ -->
+<section class="newpage">
+  <h2><span class="n">Appendix</span>Terms, method and sources</h2>
+
+  <h3>Terms used</h3>
+  <div class="gloss">
+    <div><b>Agent.</b> An AI model that carries out multi-step work with tools, rather than answering one question.</div>
+    <div><b>MCP.</b> Model Context Protocol. An open standard for connecting an AI agent to tools and data.</div>
+    <div><b>Skill.</b> A versioned folder of instructions, templates and scripts that Claude loads when a task calls for it.</div>
+    <div><b>Subagent.</b> A separate Claude instance with its own role and context, directed by the architect.</div>
+    <div><b>Hook.</b> A script that runs automatically before or after an agent action and can block it.</div>
+    <div><b>Emulated controller.</b> Software that runs the real controller program on a PC without the hardware.</div>
+    <div><b>GAMP 5.</b> The ISPE guide to risk-based validation of computerised systems in regulated life sciences.</div>
+    <div><b>Traceability matrix.</b> A table linking each requirement to its design element, test and result.</div>
+    <div><b>Openness, Logix Designer SDK, FHX.</b> The scripting or file interfaces of TIA Portal, Studio 5000 and DeltaV.</div>
+    <div><b>Virtual acceptance test.</b> A factory acceptance test run against a simulated plant before hardware exists.</div>
+  </div>
+
+  <h3>Method and limits</h3>
+  <p>Research was carried out on 15 November 2026. Vendor websites could not be opened directly from the research environment, so the facts here come from search summaries of vendor press releases, product pages and trade press. Product status changes quickly. Confirm availability, licensing and interfaces with each vendor before committing. Performance figures quoted from vendors are their own claims. Nothing here is regulatory or legal advice.</p>
+
+  <h3>Sources</h3>
+  <div class="sources">
+    <h4>Siemens</h4>
+    <ul>
+      <li>Eigen Engineering Agent product page. <a href="https://www.siemens.com/en-us/products/tia-portal/eigen-engineering-agent/">siemens.com/en-us/products/tia-portal/eigen-engineering-agent</a></li>
+      <li>Launch press release. <a href="https://press.siemens.com/global/en/pressrelease/siemens-launches-eigen-engineering-agent-bringing-purpose-built-ai-industrial">press.siemens.com/…/siemens-launches-eigen-engineering-agent-bringing-purpose-built-ai-industrial</a></li>
+      <li>Two new Eigen capabilities. <a href="https://press.siemens.com/global/en/pressrelease/siemens-takes-ai-physical-world-next-level-two-new-eigen-engineering-agent">press.siemens.com/…/siemens-takes-ai-physical-world-next-level-two-new-eigen-engineering-agent</a></li>
+      <li>ARC Advisory Group analysis. <a href="https://www.arcweb.com/industry-best-practices/copilot-engineering-agent-siemens-targets-automation-productivity-gap">arcweb.com/…/copilot-engineering-agent-siemens-targets-automation-productivity-gap</a></li>
+      <li>Siemens MCP server documentation. <a href="https://mcp.siemens.com/docs">mcp.siemens.com/docs</a></li>
+    </ul>
+    <h4>Rockwell Automation</h4>
+    <ul>
+      <li>FactoryTalk Conductor announcement, 21 October 2026. <a href="https://www.prnewswire.com/news-releases/rockwell-automation-introduces-factorytalk-conductor-an-ai-native-orchestration-platform-for-industrial-automation-302914710.html">prnewswire.com/…/rockwell-automation-introduces-factorytalk-conductor…302914710.html</a></li>
+      <li>AI-orchestrated design at Hannover Messe 2026. <a href="https://www.rockwellautomation.com/en-be/company/news/press-releases/ai-orchestrated-factory-design-at-hannover-messe.html">rockwellautomation.com/…/ai-orchestrated-factory-design-at-hannover-messe.html</a></li>
+    </ul>
+    <h4>Schneider Electric and AVEVA</h4>
+    <ul>
+      <li>ARC on Schneider's agent capabilities, April 2026. <a href="https://www.arcweb.com/blog/schneider-electric-expands-agentic-manufacturing-capabilities-microsoft-azure-ai-hannover/">arcweb.com/blog/schneider-electric-expands-agentic-manufacturing-capabilities…</a></li>
+      <li>AVEVA AI in Unified Engineering. <a href="https://www.aveva.com/en/about/news/press-releases/2026/aveva-unveils-new-artificial-intelligence-offering-across-its-unified-engineering-solution/">aveva.com/…/aveva-unveils-new-artificial-intelligence-offering-across-its-unified-engineering-solution</a></li>
+    </ul>
+    <h4>Beckhoff and CODESYS</h4>
+    <ul>
+      <li>TwinCAT CoAgent press release, June 2026. <a href="https://www.beckhoff.com/en-us/company/press/open-model-independent-ai-assistance-for-automation-programming-and-controls-engineering-2026-06.html">beckhoff.com/…/open-model-independent-ai-assistance-for-automation-programming-and-controls-engineering-2026-06.html</a></li>
+      <li>CODESYS AI-supported engineering. <a href="https://www.codesys.com/products/engineering/ai-supported-engineering/">codesys.com/products/engineering/ai-supported-engineering</a></li>
+      <li>CODESYS MCP Server, Product of the Year 2026. <a href="https://www.codesys.com/company/news-center/latest-news/codesys-mcp-server-product-of-the-year-2026/">codesys.com/…/codesys-mcp-server-product-of-the-year-2026</a></li>
+    </ul>
+    <h4>ABB, Emerson, Honeywell</h4>
+    <ul>
+      <li>B&amp;R Automation Studio Copilot. <a href="https://control.com/news/br-enhances-coding-with-new-automation-studio-code-and-copilot/">control.com/news/br-enhances-coding-with-new-automation-studio-code-and-copilot</a></li>
+      <li>Emerson AI portfolio, including DeltaV Revamp. <a href="https://www.emerson.com/en-us/news/2025/05-emerson-expanded-ai-portfolio-paves-the-way-for-more-optimized-autonomous-operations">emerson.com/en-us/news/2025/05-emerson-expanded-ai-portfolio…</a></li>
+      <li>Honeywell engineering AI, Control Engineering. <a href="https://www.controleng.com/honeywell-reorganizes-rolls-out-ai-enabled-autonomous-systems/">controleng.com/honeywell-reorganizes-rolls-out-ai-enabled-autonomous-systems</a></li>
+    </ul>
+    <h4>Other tools</h4>
+    <ul>
+      <li>MathWorks agent tools for MATLAB. <a href="https://www.mathworks.com/products/matlab/agentic-ai.html">mathworks.com/products/matlab/agentic-ai.html</a></li>
+      <li>Ignition Catalyst Agent module. <a href="https://docs.inductiveautomation.com/docs/2027/ignition-modules/catalyst/catalyst-agent">docs.inductiveautomation.com/docs/2027/ignition-modules/catalyst/catalyst-agent</a></li>
+      <li>Copia Automation funding and product, June 2026. <a href="https://thenextweb.com/news/copia-automation-26m-industrial-ot-code-resilience">thenextweb.com/news/copia-automation-26m-industrial-ot-code-resilience</a></li>
+    </ul>
+    <h4>Anthropic</h4>
+    <ul>
+      <li>Claude for Manufacturing. <a href="https://claude.com/resources/articles/claude-for-manufacturing">claude.com/resources/articles/claude-for-manufacturing</a></li>
+      <li>Claude for Life Sciences. <a href="https://www.anthropic.com/news/claude-for-life-sciences">anthropic.com/news/claude-for-life-sciences</a></li>
+      <li>Claude Managed Agents. <a href="https://claude.com/blog/building-with-claude-managed-agents">claude.com/blog/building-with-claude-managed-agents</a></li>
+      <li>Claude Code and Agent SDK documentation. <a href="https://code.claude.com/docs">code.claude.com/docs</a></li>
+    </ul>
+    <h4>Regulation</h4>
+    <ul>
+      <li>Draft Annex 22 analysis, European Pharmaceutical Review. <a href="https://www.europeanpharmaceuticalreview.com/what-annex-22-spells-for-ai-in-gmp-manufacturing/2135686.article">europeanpharmaceuticalreview.com/what-annex-22-spells-for-ai-in-gmp-manufacturing</a></li>
+      <li>Generative AI and Annex 22, Pharmaceutical Technology, August 2026. <a href="https://www.pharmtech.com/view/europe-tried-to-ban-generative-ai-from-critical-gmp-the-ban-may-not-survive-it-does-not-matter-">pharmtech.com/view/europe-tried-to-ban-generative-ai-from-critical-gmp…</a></li>
+      <li>FDA Computer Software Assurance guidance. <a href="https://www.fda.gov/media/188844/download">fda.gov/media/188844/download</a></li>
+      <li>Commentary on the final guidance. <a href="https://www.pharmaceuticalonline.com/doc/fda-s-csa-guidance-is-final-what-it-means-for-your-validation-strategy-0001">pharmaceuticalonline.com/doc/fda-s-csa-guidance-is-final…</a></li>
+    </ul>
+  </div>
+</section>
+
+</body>
+</html>
