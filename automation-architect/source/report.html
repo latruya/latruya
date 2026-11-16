@@ -250,6 +250,8 @@ figure { margin: 0; }
 .gloss { columns: 2; column-gap: 7mm; font-family: "Plex", sans-serif; font-size: 7.6pt; line-height: 1.4; margin: 0; }
 .gloss div { break-inside: avoid; margin-bottom: 1.5mm; }
 .gloss b { font-weight: 600; }
+.steps tbody td { padding-top: 1.25mm; padding-bottom: 1.25mm; }
+.steps tr.group td { padding-top: 1mm; padding-bottom: 1mm; }
 </style>
 </head>
 <body>
@@ -352,7 +354,7 @@ figure { margin: 0; }
     <div class="row tools">
       <div class="box tool"><div class="lbl">Vendor AI</div><ul><li>Siemens Eigen</li><li>FactoryTalk Conductor</li><li>EcoStruxure copilot</li><li>TwinCAT CoAgent</li><li>CODESYS MCP Server</li></ul></div>
       <div class="box tool"><div class="lbl">Engineering tools</div><ul><li>TIA Portal</li><li>Studio 5000</li><li>DeltaV, Experion</li><li>Automation Expert</li><li>TwinCAT 3</li></ul></div>
-      <div class="box tool"><div class="lbl">Simulation</div><ul><li>PLCSIM Advanced, SIMIT</li><li>Logix Echo, Emulate3D</li><li>DeltaV Simulate, Mimic</li><li>MATLAB, Simulink</li></ul></div>
+      <div class="box tool"><div class="lbl">Simulation</div><ul><li>PLCSIM Advanced</li><li>Logix Echo, Emulate3D</li><li>DeltaV Simulate, Mimic</li><li>MATLAB, Simulink</li></ul></div>
       <div class="box tool"><div class="lbl">Lifecycle systems</div><ul><li>Git, Copia Automation</li><li>Validation system (Kneat, ValGenesis)</li><li>Quality system</li></ul></div>
     </div>
     <div class="flow">&#9660;</div>
@@ -451,7 +453,7 @@ figure { margin: 0; }
   <table>
     <thead><tr><th style="width:17%">Platform</th><th style="width:38%">Who builds</th><th style="width:33%">Emulation, plant model, unit tests</th><th>Pattern</th></tr></thead>
     <tbody>
-      <tr><td>Siemens TIA Portal</td><td>Eigen carries out in-tool tasks from Claude's work packages. Openness scripts handle bulk generation. SIMATIC AX suits code kept as text.</td><td>S7-PLCSIM Advanced with SIMIT or NX Mechatronics Concept Designer. TIA Portal Test Suite.</td><td><span class="tag c">C</span> <span class="tag b">B</span></td></tr>
+      <tr><td>Siemens TIA Portal</td><td>Eigen carries out in-tool tasks from Claude's work packages. Openness scripts handle bulk generation. SIMATIC AX suits code kept as text.</td><td>S7-PLCSIM Advanced with a plant model written by Claude, or NX Mechatronics Concept Designer for machines. TIA Portal Test Suite.</td><td><span class="tag c">C</span> <span class="tag b">B</span></td></tr>
       <tr><td>Rockwell Logix</td><td>FactoryTalk Conductor agents and Design Studio Copilot. Logix Designer SDK and L5X files handle bulk generation.</td><td>FactoryTalk Logix Echo with Emulate3D.</td><td><span class="tag c">C</span> <span class="tag b">B</span></td></tr>
       <tr><td>Beckhoff TwinCAT 3</td><td>Claude works directly through CoAgent's MCP servers, or serves as the model behind CoAgent.</td><td>TwinCAT runtime on the engineering PC. Simulink models. TcUnit for unit tests.</td><td><span class="tag a">A</span></td></tr>
       <tr><td>CODESYS-based controllers</td><td>Claude works directly through the CODESYS MCP Server.</td><td>CODESYS Control Win soft controller. CODESYS Test Manager.</td><td><span class="tag a">A</span></td></tr>
@@ -524,7 +526,7 @@ figure { margin: 0; }
     <thead><tr><th style="width:17%">Tier</th><th style="width:30%">What it is</th><th style="width:28%">Tools</th><th>Purpose</th></tr></thead>
     <tbody>
       <tr><td>1 Inner loop <span class="sub">minutes per run</span></td><td>Emulated controller plus a simple plant model that Claude writes in Python or Simulink, linked over OPC UA.</td><td>PLCSIM Advanced, Logix Echo, TwinCAT runtime, CODESYS Control Win. MATLAB through its MCP server.</td><td>Runs hundreds of scenarios on every change. Catches logic, sequence and interlock errors early.</td></tr>
-      <tr><td>2 Virtual acceptance test <span class="sub">hours per run</span></td><td>The same emulated controller against the vendor's high-fidelity digital twin of the process or machine.</td><td>SIMIT, NX Mechatronics Concept Designer, Emulate3D, Mimic, UniSim Design, AVEVA Dynamic Simulation.</td><td>Proves timing, dynamics and operator screens before factory acceptance. Also trains operators.</td></tr>
+      <tr><td>2 Virtual acceptance test <span class="sub">hours per run</span></td><td>The same emulated controller against the vendor's high-fidelity digital twin of the process or machine.</td><td>NX Mechatronics Concept Designer, Emulate3D, Mimic, UniSim Design, AVEVA Dynamic Simulation.</td><td>Proves timing, dynamics and operator screens before factory acceptance. Also trains operators.</td></tr>
     </tbody>
   </table>
 
@@ -622,7 +624,7 @@ figure { margin: 0; }
   <div class="cols">
     <div class="io">
       <h4>Which platform to pilot</h4>
-      <p style="margin:0">Choose the platform where you have the most projects and the best module library. Given your interest in Eigen and in life sciences, a Siemens TIA Portal skid or process unit is the natural first pilot. Eigen is shipping and was piloted with over 100 customers, and PLCSIM Advanced with SIMIT gives a scriptable simulation chain. If a direct connection to Claude matters more than installed base, start with Beckhoff or CODESYS.</p>
+      <p style="margin:0">Choose the platform where you have the most projects and the best module library. Given your interest in Eigen and in life sciences, a Siemens TIA Portal skid or process unit is the natural first pilot. Eigen is shipping and was piloted with over 100 customers, and PLCSIM Advanced with a plant model written by Claude gives a scriptable simulation chain. If a direct connection to Claude matters more than installed base, start with Beckhoff or CODESYS.</p>
     </div>
     <div class="io">
       <h4>Questions to settle with vendors</h4>
@@ -634,6 +636,41 @@ figure { margin: 0; }
       </ul>
     </div>
   </div>
+</section>
+
+<!-- ============================ 11 STEP BY STEP ============================ -->
+<section class="newpage">
+  <h2><span class="n">11</span>Step by step: a Siemens project on your workstation</h2>
+  <p>This is what the architect does once you send the specifications, using Siemens TIA Portal and S7-PLCSIM Advanced as the example. Other platforms follow the same steps with their own tools. Steps marked <span class="tag c">You approve</span> are the gates where work stops until you, or a person you name, has approved.</p>
+  <p>The architect runs on the computer where TIA Portal and PLCSIM Advanced are installed and licensed: Claude Code installed on that machine, or a Claude session connected to a folder on it through the Claude desktop app. A Claude session in Anthropic's cloud cannot reach software installed on your computer.</p>
+
+
+  <table class="steps">
+    <thead><tr><th style="width:6%">Step</th><th style="width:22%">Action</th><th>What the architect does</th><th style="width:15%">Your part</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="4">Before the specifications arrive (once)</td></tr>
+      <tr><td>1</td><td>Check the setup</td><td>Confirms the TIA Portal and PLCSIM Advanced versions, that Openness (TIA Portal's scripting interface) is enabled, and that an emulated controller can be started.</td><td>None</td></tr>
+      <tr><td>2</td><td>Learn your standards</td><td>Reads your company templates, naming rules and module libraries, so the project is built the way your company builds.</td><td>Provide them</td></tr>
+      <tr><td>3</td><td>Set up version control</td><td>Creates a project folder tracked with Git, so every change is recorded and can be undone.</td><td>None</td></tr>
+      <tr class="group"><td colspan="4">Once the specifications arrive</td></tr>
+      <tr><td>4</td><td>Read and organize the specifications</td><td>Turns the requirements, P&amp;IDs, I/O list and sequence descriptions into a numbered list of testable requirements, each linked to its source.</td><td>Send the specifications</td></tr>
+      <tr><td>5</td><td>List the questions</td><td>Points out anything missing, unclear or contradictory, and asks about it.</td><td><span class="tag c">You approve</span> the requirements list</td></tr>
+      <tr><td>6</td><td>Recommend the solution</td><td>Proposes the controller, network and software structure, with reasons and the options compared.</td><td><span class="tag c">You approve</span> the approach</td></tr>
+      <tr><td>7</td><td>Write the design</td><td>Produces the functional specification: equipment modules, sequences, interlocks, alarms, I/O assignments and HMI screens.</td><td><span class="tag c">You approve</span> the design</td></tr>
+      <tr><td>8</td><td>Write the tests</td><td>A separate agent writes test cases from the approved requirements without seeing the code, so it cannot repeat the builder's mistakes.</td><td><span class="tag c">You approve</span> the test cases</td></tr>
+      <tr><td>9</td><td>Build the software</td><td>Creates the TIA Portal project through Openness, reusing library blocks first and writing new code only where needed. With Eigen, the architect prepares instructions, you run them in TIA Portal, and the architect reviews the result.</td><td>Run Eigen, if used</td></tr>
+      <tr><td>10</td><td>Compile and check</td><td>Compiles the project, fixes errors, and checks the code against your coding rules.</td><td>None</td></tr>
+      <tr><td>11</td><td>Build the plant model</td><td>Writes a simulation of the process (tanks, valves, motors, sensors) and connects it to the emulated controller.</td><td>None</td></tr>
+      <tr><td>12</td><td>Run the tests</td><td>Loads the code into PLCSIM Advanced and runs every test, including deliberate faults such as a failed sensor or a stuck valve.</td><td>None</td></tr>
+      <tr><td>13</td><td>Fix and repeat</td><td>For each failure, finds the cause, fixes the code and runs all the tests again, until every test passes.</td><td>None</td></tr>
+      <tr><td>14</td><td>Prove the tests work</td><td>Breaks the code on purpose and confirms the tests catch it.</td><td>None</td></tr>
+      <tr class="group"><td colspan="4">Delivery</td></tr>
+      <tr><td>15</td><td>Assemble the documentation</td><td>Functional and design specifications, test specifications with results, and a traceability matrix linking every requirement to its test. For GMP work, the validation documents as well.</td><td>None</td></tr>
+      <tr><td>16</td><td>Hand over</td><td>Delivers the TIA Portal project, the plant simulation, the test report and the documentation set.</td><td><span class="tag c">You approve</span> and sign off</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note"><strong style="color:var(--ink-2)">What the architect never does:</strong> download code to a real controller or connect to the plant network. Moving code to real hardware stays with authorized people, under your change control.</p>
 </section>
 
 <!-- ============================ SOURCES ============================ -->
